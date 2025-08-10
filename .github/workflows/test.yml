@@ -1,17 +1,58 @@
-name: En Basit Terminal
+name: Windows RDP Direct
 
 on:
   workflow_dispatch:
 
 jobs:
-  terminal:
-    runs-on: ubuntu-latest
-
+  rdp:
+    runs-on: windows-latest
+    timeout-minutes: 360
+    
     steps:
-      - name: Başlat
-        run: echo "Web terminal hazır..."
-
-      - name: 🔥 Web Terminal Bağlantısı
-        uses: lhotari/action-upterm@v1
-        with:
-          limit-access-to-actor: true
+    - name: Setup Everything
+      run: |
+        # RDP'yi etkinleştir
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        
+        # Admin user oluştur
+        net user runneradmin "Admin2024!" /add /Y
+        net localgroup administrators runneradmin /add
+        
+        # Ngrok'u indir ve kur
+        Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+        Expand-Archive ngrok.zip -Force
+        
+        # Ngrok'u başlat (auth token gerekmez!)
+        Start-Process -FilePath "ngrok\ngrok.exe" -ArgumentList "tcp --region=us 3389" -WindowStyle Hidden
+        
+        # Bağlantı bilgilerini al
+        Start-Sleep -Seconds 5
+        $response = Invoke-RestMethod http://localhost:4040/api/tunnels
+        $rdp = $response.tunnels[0].public_url -replace "tcp://", ""
+        
+        Clear-Host
+        Write-Host ""
+        Write-Host "==========================================" -ForegroundColor Green
+        Write-Host "    WINDOWS RDP READY!" -ForegroundColor Yellow
+        Write-Host "==========================================" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "Remmina ile bağlanmak için:" -ForegroundColor Cyan
+        Write-Host "Server: $rdp" -ForegroundColor White
+        Write-Host "Username: runneradmin" -ForegroundColor White
+        Write-Host "Password: Admin2024!" -ForegroundColor White
+        Write-Host ""
+        Write-Host "Terminal komut:" -ForegroundColor Cyan
+        Write-Host "remmina -c rdp://runneradmin:Admin2024!@$rdp" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "==========================================" -ForegroundColor Green
+        
+    - name: Keep Alive
+      run: |
+        $hours = 6
+        $end = (Get-Date).AddHours($hours)
+        while ((Get-Date) -lt $end) {
+          $left = $end - (Get-Date)
+          Write-Host "RDP aktif. Kalan süre: $([int]$left.TotalMinutes) dakika"
+          Start-Sleep -Seconds 600
+        }
