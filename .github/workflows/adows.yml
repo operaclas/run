@@ -1,41 +1,61 @@
-name: Windows AnyDesk
+name: Windows Remote - AnyDesk
 
 on:
   workflow_dispatch:
 
 jobs:
-  rdp:
+  remote:
     runs-on: windows-latest
     
     steps:
-    - name: Setup AnyDesk
+    - name: Download and Install AnyDesk
       run: |
-        # AnyDesk indir
-        Invoke-WebRequest https://download.anydesk.com/AnyDesk.exe -OutFile AnyDesk.exe
+        Write-Host "AnyDesk kuruluyor..." -ForegroundColor Yellow
         
-        # Yükle ve başlat
-        Start-Process AnyDesk.exe -ArgumentList "--install C:\AnyDesk --start-with-win --silent" -Wait
+        # AnyDesk indir
+        Invoke-WebRequest -Uri "https://download.anydesk.com/AnyDesk.exe" -OutFile "AnyDesk.exe"
+        
+        # Sessiz kurulum
+        Start-Process -FilePath ".\AnyDesk.exe" -ArgumentList "--install C:\AnyDesk --silent --create-shortcuts" -Wait
+        Start-Sleep -Seconds 5
+        
+        # AnyDesk'i başlat
+        Start-Process "C:\AnyDesk\AnyDesk.exe"
         Start-Sleep -Seconds 10
         
-        # Şifre ayarla
-        & "C:\AnyDesk\AnyDesk.exe" --set-password "GitHubRDP123"
+        # Şifre belirle
+        & "C:\AnyDesk\AnyDesk.exe" --set-password "GitHub2024!"
+        Start-Sleep -Seconds 5
         
-        # ID'yi al
-        $id = & "C:\AnyDesk\AnyDesk.exe" --get-id
+        # ID'yi al ve göster
+        $anydesk_id = & "C:\AnyDesk\AnyDesk.exe" --get-id
         
+        Clear-Host
+        Write-Host ""
         Write-Host "========================================" -ForegroundColor Green
-        Write-Host "ANYDESK HAZIR!" -ForegroundColor Yellow  
+        Write-Host "     ANYDESK HAZIR!" -ForegroundColor Yellow
         Write-Host "========================================" -ForegroundColor Green
         Write-Host ""
-        Write-Host "AnyDesk ID: $id" -ForegroundColor Cyan
-        Write-Host "Şifre: GitHubRDP123" -ForegroundColor Cyan
+        Write-Host "AnyDesk ID: $anydesk_id" -ForegroundColor Cyan -BackgroundColor Black
+        Write-Host "Şifre: GitHub2024!" -ForegroundColor Cyan -BackgroundColor Black
         Write-Host ""
-        Write-Host "https://anydesk.com/download" -ForegroundColor White
+        Write-Host "----------------------------------------" -ForegroundColor Gray
+        Write-Host "BAĞLANMAK İÇİN:" -ForegroundColor White
+        Write-Host "1. https://anydesk.com/download" -ForegroundColor Yellow
+        Write-Host "2. ID'yi girin: $anydesk_id" -ForegroundColor Yellow
+        Write-Host "3. Şifreyi girin: GitHub2024!" -ForegroundColor Yellow
         Write-Host "========================================" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "Sistem: Windows Server 2022" -ForegroundColor Gray
+        Write-Host "CPU: 2 cores, RAM: 7 GB" -ForegroundColor Gray
+        Write-Host ""
         
-    - name: Keep Running
+    - name: Keep Session Active
       run: |
+        Write-Host "AnyDesk bağlantısı hazır ve aktif!" -ForegroundColor Green
+        Write-Host "İptal etmek için Actions'tan durdurun." -ForegroundColor Yellow
+        
         while ($true) {
-          Write-Host "AnyDesk çalışıyor..." -ForegroundColor Green
+          Write-Host "$(Get-Date -Format 'HH:mm:ss') - Bağlantı aktif..." -ForegroundColor Gray
           Start-Sleep -Seconds 300
         }
