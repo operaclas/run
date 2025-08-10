@@ -1,43 +1,17 @@
-name: Gelişmiş Test + Terminal
+name: En Basit Terminal
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 
 jobs:
-  test:
+  terminal:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Merhaba dünya
-        run: echo "Merhaba GitHub Actions!"
-      
-      - name: Kodu çek
-        uses: actions/checkout@v4
-      
-      - name: Python kur
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      
-      - name: Python script çalıştır
-        run: |
-          python3 -c "
-          import sys
-          import platform
-          print(f'Python versiyon: {sys.version}')
-          print(f'Platform: {platform.system()} {platform.release()}')
-          print('GitHub Actions runner çalışıyor! 🚀')
-          "
-      
-      - name: Dosya oluştur
-        run: |
-          echo 'Bu dosya GitHub Actions runner tarafından oluşturuldu' > output.txt
-          echo "Oluşturulma zamanı: $(date)" >> output.txt
-          cat output.txt
-      
-      - name: 🔥 SSH Terminal Bağlantısı
-        uses: mxschmitt/action-tmate@v3
+      - name: Başlat
+        run: echo "Web terminal hazır..."
+
+      - name: 🔥 Web Terminal Bağlantısı
+        uses: lhotari/action-upterm@v1
         with:
           limit-access-to-actor: true
