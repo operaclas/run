@@ -1,27 +1,14 @@
-name: SSH Debug
+name: SSH Connection
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 
 jobs:
-  build:
+  ssh:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run a one-line script
-      run: echo Hello, world!
-    
-    - name: Run a multi-line script
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
-    
-    # BU ADIMI EKLEYİN - SSH BAĞLANTISI İÇİN
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
       with:
-        limit-access-to-actor: true
+        limit-access-to-actor: false  # SSH anahtarı kontrolünü kapatır
