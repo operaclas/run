@@ -1,4 +1,4 @@
-name: Windows Parsec Remote
+name: Windows AnyDesk
 
 on:
   workflow_dispatch:
@@ -8,32 +8,34 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - name: Install Parsec
+    - name: Setup AnyDesk
       run: |
-        # Parsec indir (gaming remote desktop)
-        Invoke-WebRequest https://builds.parsecgaming.com/package/parsec-windows.exe -OutFile parsec.exe
+        # AnyDesk indir
+        Invoke-WebRequest https://download.anydesk.com/AnyDesk.exe -OutFile AnyDesk.exe
         
-        # Sessiz kurulum
-        Start-Process -FilePath parsec.exe -ArgumentList "/S" -Wait
+        # Yükle ve başlat
+        Start-Process AnyDesk.exe -ArgumentList "--install C:\AnyDesk --start-with-win --silent" -Wait
+        Start-Sleep -Seconds 10
+        
+        # Şifre ayarla
+        & "C:\AnyDesk\AnyDesk.exe" --set-password "GitHubRDP123"
+        
+        # ID'yi al
+        $id = & "C:\AnyDesk\AnyDesk.exe" --get-id
         
         Write-Host "========================================" -ForegroundColor Green
-        Write-Host "PARSEC KURULDU!" -ForegroundColor Yellow
+        Write-Host "ANYDESK HAZIR!" -ForegroundColor Yellow  
         Write-Host "========================================" -ForegroundColor Green
         Write-Host ""
-        Write-Host "1. https://parsec.app adresinden hesap açın" -ForegroundColor Cyan
-        Write-Host "2. Parsec uygulamasını telefonunuza indirin" -ForegroundColor Cyan
-        Write-Host "3. Bu bilgisayar otomatik görünecek" -ForegroundColor Cyan
+        Write-Host "AnyDesk ID: $id" -ForegroundColor Cyan
+        Write-Host "Şifre: GitHubRDP123" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "Sistem Bilgisi:" -ForegroundColor Yellow
-        Write-Host "OS: Windows Server 2022" -ForegroundColor White
-        Write-Host "CPU: 2 cores" -ForegroundColor White
-        Write-Host "RAM: 7 GB" -ForegroundColor White
+        Write-Host "https://anydesk.com/download" -ForegroundColor White
         Write-Host "========================================" -ForegroundColor Green
         
-    - name: Create User
+    - name: Keep Running
       run: |
-        net user parsecuser "Parsec123!" /add
-        net localgroup administrators parsecuser /add
-        
-    - name: Keep Alive
-      run: Start-Sleep -Seconds 21600
+        while ($true) {
+          Write-Host "AnyDesk çalışıyor..." -ForegroundColor Green
+          Start-Sleep -Seconds 300
+        }
