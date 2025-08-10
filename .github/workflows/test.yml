@@ -1,4 +1,4 @@
-name: İlk Test
+name: Gelişmiş Test
 
 on:
   workflow_dispatch:
@@ -13,10 +13,26 @@ jobs:
       - name: Merhaba dünya
         run: echo "Merhaba GitHub Actions!"
       
-      - name: Tarih göster
-        run: date
+      - name: Kodu çek
+        uses: actions/checkout@v4
       
-      - name: Sistem bilgisi
+      - name: Python kur
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Python script çalıştır
         run: |
-          echo "CPU: $(nproc) çekirdek"
-          echo "RAM: $(free -h | grep Mem | awk '{print $2}')"
+          python3 -c "
+          import sys
+          import platform
+          print(f'Python versiyon: {sys.version}')
+          print(f'Platform: {platform.system()} {platform.release()}')
+          print('GitHub Actions runner çalışıyor! 🚀')
+          "
+      
+      - name: Dosya oluştur
+        run: |
+          echo 'Bu dosya GitHub Actions runner tarafından oluşturuldu' > output.txt
+          echo "Oluşturulma zamanı: $(date)" >> output.txt
+          cat output.txt
