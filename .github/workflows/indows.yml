@@ -1,0 +1,70 @@
+name: Instant Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rdp:
+    runs-on: windows-latest
+    timeout-minutes: 120  # 2 saat (ngrok free limit)
+    
+    steps:
+    - name: Hızlı RDP Kurulumu
+      run: |
+        # RDP'yi aç
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        
+        # Kullanıcı oluştur
+        $password = "RDP2024!"
+        net user rdpuser "$password" /add /Y
+        net localgroup administrators rdpuser /add
+        
+        # Ngrok'u indir (kayıt gerekmez!)
+        Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+        Expand-Archive ngrok.zip -Force
+        
+        # Ngrok'u başlat - AUTH TOKEN YOK!
+        Start-Job -ScriptBlock { .\ngrok\ngrok.exe tcp 3389 }
+        Start-Sleep -Seconds 8
+        
+        # Bağlantı bilgilerini al ve göster
+        try {
+            $api = Invoke-RestMethod http://localhost:4040/api/tunnels
+            $tunnel = $api.tunnels[0].public_url -replace "tcp://", ""
+            
+            Write-Host ""
+            Write-Host "========================================" -ForegroundColor Green
+            Write-Host "   WINDOWS RDP HAZIR!" -ForegroundColor Yellow
+            Write-Host "========================================" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "REMMINA İÇİN KOPYALA/YAPIŞTIR:" -ForegroundColor Cyan
+            Write-Host ""
+            Write-Host "Adres: $tunnel" -ForegroundColor White -BackgroundColor DarkBlue
+            Write-Host "Kullanıcı: rdpuser" -ForegroundColor White -BackgroundColor DarkBlue
+            Write-Host "Şifre: $password" -ForegroundColor White -BackgroundColor DarkBlue
+            Write-Host ""
+            Write-Host "----------------------------------------" -ForegroundColor Gray
+            Write-Host "VEYA TEK SATIRDA:" -ForegroundColor Cyan
+            Write-Host ""
+            Write-Host "remmina -c rdp://rdpuser:$password@$tunnel" -ForegroundColor Yellow -BackgroundColor DarkGray
+            Write-Host ""
+            Write-Host "========================================" -ForegroundColor Green
+            Write-Host "Süre: 2 saat (ngrok free limit)" -ForegroundColor Red
+            Write-Host "========================================" -ForegroundColor Green
+            
+        } catch {
+            Write-Host "Ngrok başlatılamadı!" -ForegroundColor Red
+        }
+        
+    - name: RDP Oturumunu Açık Tut
+      run: |
+        Write-Host "`nRDP bağlantısı aktif. İptal etmek için Actions'tan durdurun.`n" -ForegroundColor Green
+        
+        # 2 saat boyunca aktif tut
+        $end = (Get-Date).AddHours(2)
+        while ((Get-Date) -lt $end) {
+            $remaining = [math]::Round((($end - (Get-Date)).TotalMinutes))
+            Write-Host "✓ RDP Aktif - Kalan: $remaining dakika" -ForegroundColor Green
+            Start-Sleep -Seconds 300
+        }
