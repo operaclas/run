@@ -1,0 +1,22 @@
+name: İlk Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Merhaba dünya
+        run: echo "Merhaba GitHub Actions!"
+      
+      - name: Tarih göster
+        run: date
+      
+      - name: Sistem bilgisi
+        run: |
+          echo "CPU: $(nproc) çekirdek"
+          echo "RAM: $(free -h | grep Mem | awk '{print $2}')"
