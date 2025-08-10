@@ -1,17 +1,44 @@
-name: Terminal Bağlantısı
+name: Gelişmiş Test + Terminal
 
 on:
-  workflow_dispatch:  # Manuel başlatma için
+  workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
-  debug:
+  test:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Merhaba dünya
+        run: echo "Merhaba GitHub Actions!"
+      
       - name: Kodu çek
         uses: actions/checkout@v4
       
-      - name: Terminal bağlantısı kur
+      - name: Python kur
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Python script çalıştır
+        run: |
+          python3 -c "
+          import sys
+          import platform
+          print(f'Python versiyon: {sys.version}')
+          print(f'Platform: {platform.system()} {platform.release()}')
+          print('GitHub Actions runner çalışıyor! 🚀')
+          "
+      
+      - name: Dosya oluştur
+        run: |
+          echo 'Bu dosya GitHub Actions runner tarafından oluşturuldu' > output.txt
+          echo "Oluşturulma zamanı: $(date)" >> output.txt
+          cat output.txt
+      
+      - name: 🔥 SSH Terminal Bağlantısı
         uses: mxschmitt/action-tmate@v3
         with:
-          limit-access-to-actor: true  # Sadece sen bağlanabilirsin
+          limit-access-to-actor: true
+        if: github.event_name == 'workflow_dispatch'
