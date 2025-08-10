@@ -1,0 +1,12 @@
+name: SSH Debug
+
+on:
+  workflow_dispatch:  # Manuel tetikleme için
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
